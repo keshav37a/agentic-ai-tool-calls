@@ -1,0 +1,26 @@
+{
+    "name": "agi",
+    "version": "1.0.0",
+    "type": "module",
+    "bin": {
+        "agi": "./dist/cli.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc -p tsconfig.build.json"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "2.3.7",
+        "@types/node": "^24.10.1",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "@ai-sdk/openai": "^2.0.72",
+        "@types/shelljs": "^0.8.17",
+        "ai": "^5.0.102",
+        "dotenv": "^17.2.3",
+        "zod": "^4.1.13"
+    }
+}
