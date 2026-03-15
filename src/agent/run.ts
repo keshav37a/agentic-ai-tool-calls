@@ -1,11 +1,14 @@
 import 'dotenv/config';
-import { generateText, type ModelMessage } from 'ai';
+
 import { openai } from '@ai-sdk/openai';
 import { getTracer, Laminar } from '@lmnr-ai/lmnr';
+import { generateText, type ModelMessage } from 'ai';
+
 import { SYSTEM_PROMPT } from './system/prompt.js';
-import type { AgentCallbacks } from '../types.js';
 import { tools } from './tools/index.js';
 import { executeTools } from './executeTools.js';
+
+import type { AgentCallbacks } from '../types.js';
 
 const MODEL_NAME = 'gpt-5-mini';
 

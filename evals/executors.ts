@@ -50,7 +50,7 @@ const TOOL_DEFINITIONS: Record<string, { description: string; parameters: z.ZodO
  * Single-turn executor with mocked tools.
  * Uses predefined tool definitions - tools never execute, only selection is tested.
  */
-export async function singleTurnWithMocks(data: EvalData): Promise<SingleTurnResult> {
+export async function singleTurnExecutorWithMocks(data: EvalData): Promise<SingleTurnResult> {
     const messages = buildMessages(data);
 
     // Build mocked tools from definitions
