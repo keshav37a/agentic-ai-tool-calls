@@ -143,8 +143,3 @@ export const runAgent = async (userMessage: string, conversationHistory: ModelMe
     callbacks?.onComplete?.(fullResponse);
     return messages;
 };
-
-let conversation: ModelMessage[] = [];
-
-conversation = await runAgent('My name is KM', conversation);
-conversation = await runAgent('What is my name?', conversation);
