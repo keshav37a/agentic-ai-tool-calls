@@ -81,7 +81,7 @@ export const runAgent = async (userMessage: string, conversationHistory: ModelMe
             for await (const chunk of result.fullStream) {
                 if (chunk.type === 'text-delta') {
                     callbacks?.onToken(chunk.text);
-                    console.log('chunk: ', chunk.text);
+                    currentText += chunk.text;
                 } else if (chunk.type === 'tool-call') {
                     const input = 'input' in chunk ? chunk.input : {};
                     const { toolCallId, toolName } = chunk;
@@ -111,6 +111,8 @@ export const runAgent = async (userMessage: string, conversationHistory: ModelMe
 
         const finishReason = await result.finishReason;
         const responseMessages = await result.response;
+
+        fullResponse += currentText;
 
         messages.push(...responseMessages.messages);
 

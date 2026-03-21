@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Box, Text, useApp } from 'ink';
+import { Box, Text, useApp, useInput } from 'ink';
 import type { ModelMessage } from 'ai';
 import { runAgent } from '../agent/run.ts';
 import { MessageList, type Message } from './components/MessageList.tsx';
@@ -17,6 +17,18 @@ export function App() {
     const [isLoading, setIsLoading] = useState(false);
     const [streamingText, setStreamingText] = useState('');
     const [activeToolCalls, setActiveToolCalls] = useState<ActiveToolCall[]>([]);
+    const [input, setInput] = useState('');
+
+    useInput((key, inputKey) => {
+        if (inputKey.return) {
+            handleSubmit(input);
+            setInput('');
+        } else if (inputKey.backspace || inputKey.delete) {
+            setInput((prev) => prev.slice(0, -1));
+        } else {
+            setInput((prev) => prev + key);
+        }
+    });
 
     const handleSubmit = useCallback(
         async (userInput: string) => {
@@ -112,6 +124,10 @@ export function App() {
                         <Spinner />
                     </Box>
                 )}
+            </Box>
+            <Box>
+                <Text color='cyan'>› You: </Text>
+                <Text>{input}</Text>
             </Box>
         </Box>
     );
