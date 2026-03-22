@@ -3,6 +3,13 @@ export interface AgentCallbacks {
     onToolCallStart: (name: string, args: unknown) => void;
     onToolCallEnd: (name: string, result: string) => void;
     onComplete: (response: string) => void;
+    onTokenUsage: (usage: TokenUsageInfo) => void;
+}
+
+export interface ModelLimits {
+    inputLimit: number;
+    outputLimit: number;
+    contextWindow: number;
 }
 
 export interface ToolCallInfo {

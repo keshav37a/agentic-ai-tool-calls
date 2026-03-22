@@ -1,10 +1,16 @@
-import { useState, useCallback } from 'react';
-import { Box, Text, useApp, useInput } from 'ink';
 import type { ModelMessage } from 'ai';
-import { runAgent } from '../agent/run.ts';
+import { Box, Text, useApp, useInput } from 'ink';
+import { useState, useCallback } from 'react';
+
 import { MessageList, type Message } from './components/MessageList.tsx';
 import { ToolCall, type ToolCallProps } from './components/ToolCall.tsx';
 import { Spinner } from './components/Spinner.tsx';
+import { TokenUsage } from './components/TokenUsage.tsx';
+import { Input } from './components/Input.tsx';
+
+import { runAgent } from '../agent/run.ts';
+
+import type { TokenUsageInfo } from '../types.ts';
 
 interface ActiveToolCall extends ToolCallProps {
     id: string;
@@ -17,18 +23,7 @@ export function App() {
     const [isLoading, setIsLoading] = useState(false);
     const [streamingText, setStreamingText] = useState('');
     const [activeToolCalls, setActiveToolCalls] = useState<ActiveToolCall[]>([]);
-    const [input, setInput] = useState('');
-
-    useInput((key, inputKey) => {
-        if (inputKey.return) {
-            handleSubmit(input);
-            setInput('');
-        } else if (inputKey.backspace || inputKey.delete) {
-            setInput((prev) => prev.slice(0, -1));
-        } else {
-            setInput((prev) => prev + key);
-        }
-    });
+    const [tokenUsage, setTokenUsage] = useState<TokenUsageInfo | null>(null);
 
     const handleSubmit = useCallback(
         async (userInput: string) => {
@@ -73,6 +68,9 @@ export function App() {
                         }
                         setStreamingText('');
                         setActiveToolCalls([]);
+                    },
+                    onTokenUsage: (usage) => {
+                        setTokenUsage(usage);
                     },
                 });
 
@@ -125,10 +123,8 @@ export function App() {
                     </Box>
                 )}
             </Box>
-            <Box>
-                <Text color='cyan'>› You: </Text>
-                <Text>{input}</Text>
-            </Box>
+            <Input onSubmit={handleSubmit} disabled={isLoading} />
+            <TokenUsage usage={tokenUsage} />
         </Box>
     );
 }

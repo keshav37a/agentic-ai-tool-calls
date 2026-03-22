@@ -7,8 +7,16 @@ import { streamText, type ModelMessage } from 'ai';
 import { SYSTEM_PROMPT } from './system/prompt.js';
 import { tools } from './tools/index.js';
 import { executeTools } from './executeTools.js';
+import {
+    estimateMessagesTokens,
+    getModelLimits,
+    isOverThreshold,
+    calculateUsagePercentage,
+    compactConversation,
+    DEFAULT_THRESHOLD,
+} from './context/index.ts';
 
-import type { AgentCallbacks, ToolCallInfo } from '../types.js';
+import type { AgentCallbacks, ModelLimits, ToolCallInfo } from '../types.js';
 
 const MODEL_NAME = 'gpt-5-mini';
 
@@ -52,13 +60,40 @@ const filterCompatibleMessages = (messages: ModelMessage[]): ModelMessage[] => {
     });
 };
 
+const reportTokenUsage = (messages: ModelMessage[], modelLimits: ModelLimits, callbacks: AgentCallbacks) => {
+    if (callbacks.onTokenUsage) {
+        const usage = estimateMessagesTokens(messages);
+        callbacks.onTokenUsage({
+            inputTokens: usage.input,
+            outputTokens: usage.output,
+            totalTokens: usage.total,
+            contextWindow: modelLimits.contextWindow,
+            threshold: DEFAULT_THRESHOLD,
+            percentage: calculateUsagePercentage(usage.total, modelLimits.contextWindow),
+        });
+    }
+};
+
 export const runAgent = async (userMessage: string, conversationHistory: ModelMessage[], callbacks: AgentCallbacks) => {
-    const workingHistory = filterCompatibleMessages(conversationHistory);
-    const messages: ModelMessage[] = [
+    let workingHistory = filterCompatibleMessages(conversationHistory);
+    let messages: ModelMessage[] = [
         { role: 'system', content: SYSTEM_PROMPT },
         ...workingHistory,
         { role: 'user', content: userMessage },
     ];
+
+    const modelLimits = getModelLimits(MODEL_NAME);
+    const preCheckTokens = estimateMessagesTokens(messages);
+
+    if (isOverThreshold(preCheckTokens.total, modelLimits.contextWindow, DEFAULT_THRESHOLD)) {
+        // Compact the conversation
+        workingHistory = await compactConversation(workingHistory, MODEL_NAME);
+        messages = [
+            { role: 'system', content: SYSTEM_PROMPT },
+            ...workingHistory,
+            { role: 'user', content: userMessage },
+        ];
+    }
 
     let fullResponse = '';
 
@@ -115,6 +150,7 @@ export const runAgent = async (userMessage: string, conversationHistory: ModelMe
         fullResponse += currentText;
 
         messages.push(...responseMessages.messages);
+        reportTokenUsage(messages, modelLimits, callbacks);
 
         if (finishReason !== 'tool-calls' || toolCalls.length === 0) {
             break;
@@ -137,6 +173,8 @@ export const runAgent = async (userMessage: string, conversationHistory: ModelMe
                     },
                 ],
             });
+
+            reportTokenUsage(messages, modelLimits, callbacks);
         }
     }
 
