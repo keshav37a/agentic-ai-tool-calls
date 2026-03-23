@@ -1,5 +1,5 @@
 import type { ModelMessage } from 'ai';
-import { Box, Text, useApp, useInput } from 'ink';
+import { Box, Text, useApp } from 'ink';
 import { useState, useCallback } from 'react';
 
 import { MessageList, type Message } from './components/MessageList.tsx';

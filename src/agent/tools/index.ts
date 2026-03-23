@@ -1,3 +1,4 @@
+import { executeCodeTool } from './codeExecution.js';
 import { dateTimeTool } from './dateTime.js';
 import { deleteFileTool, listFilesTool, readFileTool, writeFileTool } from './file.js';
 import { runShellCommandTool } from './shell.js';
@@ -7,6 +8,7 @@ import { webSearchTool } from './webSearch.js';
 export const tools = {
     dateTimeTool,
     deleteFileTool,
+    executeCodeTool,
     listFilesTool,
     readFileTool,
     runShellCommandTool,
