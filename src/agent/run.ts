@@ -156,7 +156,14 @@ export const runAgent = async (userMessage: string, conversationHistory: ModelMe
             break;
         }
 
+        let rejected = false;
         for (const tc of toolCalls) {
+            const approved = await callbacks.onToolApproval(tc.toolName, tc.args);
+            if (!approved) {
+                rejected = true;
+                break;
+            }
+
             const { toolCallId, toolName, args } = tc;
             const result = await executeTools(toolName, args);
 
@@ -175,6 +182,9 @@ export const runAgent = async (userMessage: string, conversationHistory: ModelMe
             });
 
             reportTokenUsage(messages, modelLimits, callbacks);
+        }
+        if (rejected) {
+            break;
         }
     }
 
