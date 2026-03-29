@@ -10,7 +10,8 @@
     ],
     "scripts": {
         "build": "tsc -p tsconfig.build.json",
-        "eval": "npx lmnr eval"
+        "eval": "npx lmnr eval",
+        "start": "npx tsx src/cli"
     },
     "devDependencies": {
         "@biomejs/biome": "2.3.7",
